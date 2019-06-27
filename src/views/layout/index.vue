@@ -27,11 +27,14 @@ export default {
   height: 100%;
   // background-color: #ccc;
 }
+.el-aside {
+  background-color: #515b63;
+}
 .el-header {
-  background-color: pink;
+  background-color: #ccc;
 }
 .el-main {
-  background-color: green;
+  background-color: rgb(221, 221, 221);
 }
 // .el-input__inner {
 //     width: 100px;   // 为什么我不能写在单独的组件里面呢???? 在组件里面使用

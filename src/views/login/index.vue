@@ -10,7 +10,7 @@
                   <el-input  v-model="formdata.code"></el-input>
               </el-form-item>
               <el-form-item prop="agree">
-                  <el-checkbox class="ckb" v-model="formdata.agree"></el-checkbox>我同意协议
+                  <el-checkbox class="ckb"  v-model="formdata.agree"></el-checkbox>我同意协议
               </el-form-item>
               <div class="btn-con">
                 <el-button @click.prevent="handleLogin" :loading="isLoading" type="primary">登录</el-button>
@@ -29,7 +29,6 @@
 
 <script>
 import '@/vendor/gt.js';
-import axios from 'axios';
 import { setInterval, clearInterval } from 'timers';
 
 export default {
@@ -37,9 +36,9 @@ export default {
   data () {
     return {
       formdata: {
-        mobile: '',
-        code: '',
-        agree: ''
+        mobile: '13911111111',
+        code: '123456',
+        agree: true
       },
       timer: null,
       count: 10,
@@ -69,7 +68,7 @@ export default {
       // 校验mobile是否符合要求
       this.$refs['ruleForm'].validateField('mobile', errMessage => {
         // 如果不符合直接return
-        if (errMessage.trim().length > 0) {
+        if (errMessage.trim().length > 0) { // 这个表示有错误信息, 不符合要求, 错误信息就是你设置的
           return;
         };
         // 表示mobile符合标准, 判断是否创建了captchaObj对象
@@ -79,11 +78,11 @@ export default {
           // 若不相同的情况要重新初始化验证码
           if (this.current !== this.formdata.mobile) {
             // 重新初始化验证码插件
-            console.log('准备重新创建');
+            // console.log('准备重新创建');
             this.showGeetest();
           } else {
             // 如果相同, 则直接调用verify方法
-            console.log('这里是直接使用verify');
+            // console.log('这里是直接使用verify');
             this.captchaObj.verify();
           };
         } else {
@@ -112,12 +111,12 @@ export default {
         return;
       };
       const { mobile } = this.formdata;
-      axios({
+      this.$http({
         method: 'GET',
-        url: `http://ttapi.research.itcast.cn/mp/v1_0/captchas/${mobile}`
-      }).then(res => {
+        url: `/captchas/${mobile}`
+      }).then(data => {
         // 这里是创建验证视图
-        const { data } = res.data;
+        // const { data } = res.data;
         window.initGeetest({
           gt: data.gt,
           challenge: data.challenge,
@@ -132,43 +131,46 @@ export default {
             this.current = this.formdata.mobile;
             captchaObj.verify();
           }).onSuccess(() => { // 这里是人机验证成功后才会进入的
-            // 人机交互验证通过
-            // console.log(captchaObj.getValidate());
             const {
               geetest_challenge: challenge,
               geetest_seccode: seccode,
               geetest_validate: validate } = captchaObj.getValidate();
-            axios({
+            this.$http({
               method: 'GET',
-              url: `http://ttapi.research.itcast.cn/mp/v1_0/sms/codes/${mobile}`,
+              url: `/sms/codes/${mobile}`,
               params: {
                 challenge,
                 validate,
                 seccode
               }
-            }).then(res => {
-              console.log(res.data);
+            }).then(data => {
+              // console.log(data);
             });
           }).onError(function () {
             // my code
-            console.log('gagagaga');
+            // console.log('gagagaga');
           });
         });
       });
     },
     handleLogin () {
-      this.isLoading = true;
       if (!this.formdata.agree) {
-        this.isLoading = false;
         return this.$message.error('请先同意协议!!!');
       };
-      axios({
+      this.isLoading = true;
+      this.$http({
         method: 'POST',
-        url: 'http://ttapi.research.itcast.cn/mp/v1_0/authorizations',
+        url: '/authorizations',
         data: this.formdata // 由于手机号码没有登录过所以会报错403, 表示**无权限**, 服务器识别, 但是不给响应, 400表示, 请求的参数缺失
       }).then(res => {
         this.isLoading = false;
-        console.log(res.data);
+        // console.log(res);
+        // if (res.status === 201) { // 由于添加了响应拦截器, 这里就不能再使用.status判断了
+        // 由于手机号码没有注册过, 所以没有权限,这里就当是登录成功的时候
+        // 保存手机号码, 保存到sessionStorage里面, 在登录后显示到AppHeader里面
+        var userInfo = JSON.stringify(res);
+        window.sessionStorage.setItem('userInfo', userInfo); // 把带有token的放到本地存储里面
+        this.isLoading = false;
         this.$message({
           message: '恭喜你，这是一条成功消息',
           type: 'success'
@@ -176,24 +178,8 @@ export default {
         this.$router.push({
           name: 'home'
         });
-      }).catch(err => {
-        if (err.response.status === 403) {
-          // 由于手机号码没有注册过, 所以没有权限,这里就当是登录成功的时候
-          // 保存手机号码, 保存到sessionStorage里面, 在登录后显示到AppHeader里面
-          window.sessionStorage.setItem('mobileNum', this.formdata.mobile);
-          this.isLoading = false;
-          this.$message({
-            message: '恭喜你，这是一条成功消息',
-            type: 'success'
-          });
-          this.$router.push({
-            name: 'home'
-          });
-        } else if (err.response.status === 400) {
-          this.$message.error('手机号或者验证码错误');
-          this.isLoading = false;
-        }
-      });
+        // }
+      }); // 为什么这里catch 不行
     }
   }
 };
@@ -202,7 +188,7 @@ export default {
 <style lang="less" scoped>
 body, #app, #login {
     width: 100%;
-    height: 400px;
+    // height: 400px;
 }
 #login {
     display: flex;
@@ -214,7 +200,7 @@ body, #app, #login {
 }
 .login-input {
     width: 400px;
-    height: 250px;
+    // height: 250px;
     .btn-con {
       display: flex;
       justify-content: space-around;

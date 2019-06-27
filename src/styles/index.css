@@ -12,3 +12,45 @@ html .el-header {
   line-height: 60px;
   vertical-align: middle;
 }
+body #login,
+html #login {
+  height: 100%;
+  background: url(http://seopic.699pic.com/photo/40026/0445.jpg_wh1200.jpg) left center;
+  background-size: cover;
+  color: #D3DCE6;
+}
+body #login h1,
+html #login h1 {
+  color: #ccc;
+}
+body .el-table td,
+html .el-table td,
+body .el-table th,
+html .el-table th {
+  text-align: center;
+}
+body .el-header,
+html .el-header,
+body .el-footer,
+html .el-footer {
+  background-color: #B3C0D1;
+  color: #333;
+  text-align: center;
+  line-height: 60px;
+}
+body .el-aside,
+html .el-aside {
+  background-color: #D3DCE6;
+  color: #333;
+  text-align: center;
+  line-height: 200px;
+}
+body .el-main,
+html .el-main {
+  background-color: #E9EEF3;
+  color: #333;
+}
+body .test,
+html .test {
+  height: 1000px;
+}

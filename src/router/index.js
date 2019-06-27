@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-
+import nprogress from 'nprogress';
 Vue.use(Router);
 
 const router = new Router({
@@ -18,6 +18,11 @@ const router = new Router({
           name: 'publish',
           path: '/publish',
           component: () => import('@/views/publish/')
+        },
+        {
+          name: 'articles',
+          path: '/articles',
+          component: () => import('@/views/articles/')
         }
       ]
     },
@@ -30,23 +35,28 @@ const router = new Router({
 });
 
 router.beforeEach((to, from, next) => {
-  // console.log(to);
-  const mobileNum = window.sessionStorage.getItem('mobileNum');
+  nprogress.start();
+  const userInfo = window.sessionStorage.getItem('userInfo');
+  // console.log(userInfo);
   if (to.path !== '/login') {
-    if (!mobileNum) {
+    if (!userInfo) {
       return next({ name: 'login' });
     } else {
       next();
     }
   } else {
     // 这里表示访问登录页面
-    console.log(mobileNum);
-    // 如果有了mobileNum就不让他访问
-    if (mobileNum) {
+    // console.log(userInfo);
+    // 如果有了userInfo就不让他访问
+    if (userInfo) {
       return next(false);
     };
     next();
   }
+});
+
+router.afterEach((to, from) => {
+  nprogress.done();
 });
 
 export default router;
